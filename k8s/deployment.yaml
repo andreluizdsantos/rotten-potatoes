@@ -19,9 +19,9 @@ spec:
             - containerPort: 27017
           env:
             - name: MONGODB_INITDB_ROOT_USERNAME
-              value: "mongouser"
+              value: mongouser
             - name: MONGODB_INITDB_ROOT_PASSWORD
-              value: "mongopwd"
+              value: mongopwd
 ---
 apiVersion: v1
 kind: Service
@@ -38,41 +38,41 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rotten-potatoes
+  name: movies
 spec:
   replicas: 5
   selector:
     matchLabels:
-      app: rotten-potatoes
+      app: movies
   template:
     metadata:
       labels:
-        app: rotten-potatoes
+        app: movies
     spec:
       containers:
-        - name: rotten-potatoes
+        - name: movies
           image: matrixsoft1/rotten-potatoes:v1
           ports:
             - containerPort: 5000
           env:
             - name: MONGODB_DB
-              value: "admin"
+              value: admin
             - name: MONGODB_HOST
-              value: "mongodb-service"
+              value: mongodb-service
             - name: MONGODB_PORT
               value: "27017"
             - name: MONGODB_USERNAME
-              value: "mongouser"
+              value: mongouser
             - name: MONGODB_PASSWORD
-              value: "mongopwd"
+              value: mongopwd
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rotten-potatoes-service
+  name: movies
 spec:
   selector:
-    app: rotten-potatoes
+    app: movies
   ports:
   - port: 80
     targetPort: 5000
