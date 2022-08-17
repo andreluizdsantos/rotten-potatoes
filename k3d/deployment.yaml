@@ -2,78 +2,79 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo
+  name: mongodb
 spec:
   selector:
     matchLabels:
-      app: mongo
+      app: mongodb
   template:
     metadata:
       labels:
-        app: mongo
+        app: mongodb
     spec:
       containers:
-        - name: mongo
-          image: mongo:4.4-rc-nanoserver
+        - name: mongodb
+          image: mongo:5.0.0
           ports:
             - containerPort: 27017
           env:
-            - name: MONGODB_PASSWORD
-              value: "mongopwd"
-            - name: MONGODB_USERNAME
+            - name: MONGODB_INITDB_ROOT_USERNAME
               value: "mongouser"
-            - name: MONGODB_DB
-              value: "admin"
+            - name: MONGODB_INITDB_ROOT_PASSWORD
+              value: "mongopwd"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo
+  name: mongodb-service
 spec:
   selector:
-    app: mongo
+    app: mongodb
   ports:
   - port: 27017
     targetPort: 27017
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rotten-potatoes
+  name: movies
 spec:
   replicas: 5
   selector:
     matchLabels:
-      app: rotten-potatoes
+      app: movies
   template:
     metadata:
       labels:
-        app: rotten-potatoes
+        app: movies
     spec:
       containers:
-        - name: rotten-potatoes
+        - name: movies
           image: matrixsoft1/rotten-potatoes:v1
+          ports:
+            - containerPort: 5000
           env:
             - name: MONGODB_DB
               value: "admin"
+            - name: MONGODB_HOST
+              value: "mongodb-service"
+            - name: MONGODB_PORT
+              value: "27017"
             - name: MONGODB_USERNAME
               value: "mongouser"
             - name: MONGODB_PASSWORD
               value: "mongopwd"
-            - name: MONGODB_HOST
-              value: "localhost"
-            - name: MONGODB_PORT
-              value: "27017"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: rotten-potatoes
+  name: movies
 spec:
   selector:
-    app: rotten-potatoes
+    app: movies
   ports:
-  - port: 5000
+  - port: 80
     targetPort: 5000
     nodePort: 30000
   type: NodePort
