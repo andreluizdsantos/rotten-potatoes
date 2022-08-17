@@ -1,0 +1,79 @@
+# Deployment do Mongo
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4-rc-nanoserver
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGODB_PASSWORD
+              value: "mongopwd"
+            - name: MONGODB_USERNAME
+              value: "mongouser"
+            - name: MONGODB_DB
+              value: "admin"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rotten-potatoes
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: rotten-potatoes
+  template:
+    metadata:
+      labels:
+        app: rotten-potatoes
+    spec:
+      containers:
+        - name: rotten-potatoes
+          image: matrixsoft1/rotten-potatoes:v1
+          env:
+            - name: MONGODB_DB
+              value: "admin"
+            - name: MONGODB_USERNAME
+              value: "mongouser"
+            - name: MONGODB_PASSWORD
+              value: "mongopwd"
+            - name: MONGODB_HOST
+              value: "localhost"
+            - name: MONGODB_PORT
+              value: "27017"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rotten-potatoes
+spec:
+  selector:
+    app: rotten-potatoes
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30000
+  type: LoadBalancer
